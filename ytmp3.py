@@ -1,6 +1,7 @@
 from tkinter import Tk,Button,Label,Entry,DISABLED,NORMAL,NSEW
 import youtube_dl
-import sys,os
+import sys
+import os
 from threading import Thread
 import socket
 
