@@ -1,31 +1,30 @@
-from tkinter import Tk,Button,Label,Entry,DISABLED,NORMAL,NSEW
+from tkinter import Tk, Button, Label, Entry, DISABLED, NORMAL, NSEW
 import youtube_dl
-import sys
-import os
 from threading import Thread
 import socket
 
-SAVE_PATH=r"C:\Users\sou22\Downloads"
+SAVE_PATH = r"C:\Users\sou22\Downloads"
 ydl_opts = {
-    'format': 'bestaudio/best',
-    'extractaudio':True,
-    'audioformat':'mp3',
-    'noplaylist': True,
-    'nocheckcertificate':True,
-    'outtmpl':SAVE_PATH + '/%(title)s (%(id)s).%(ext)s',
-    'postprocessors': [
+    "format": "bestaudio/best",
+    "extractaudio": True,
+    "audioformat": "mp3",
+    "noplaylist": True,
+    "nocheckcertificate": True,
+    "outtmpl": SAVE_PATH + "/%(title)s (%(id)s).%(ext)s",
+    "postprocessors": [
         {
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "mp3",
+            "preferredquality": "192",
         },
     ],
 }
 
-root=Tk()
+root = Tk()
 root.title("YouTube to mp3 (Made by Sourabh Sathe)")
 root.geometry("700x70")
 root.config(bg="white")
+
 
 def is_connected():
     try:
@@ -35,12 +34,10 @@ def is_connected():
         pass
     return False
 
+
 def is_supported(url):
     extractors = youtube_dl.extractor.gen_extractors()
-    for e in extractors:
-        if e.suitable(url) and e.IE_NAME != 'generic':
-            return True
-    return False
+    return any(e.suitable(url) and e.IE_NAME != "generic" for e in extractors)
 
 
 def downloadtoMP3():
@@ -49,7 +46,7 @@ def downloadtoMP3():
         if is_supported(urlbox.get()):
             with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                 urlbox.config(fg="green")
-                status.config(text="Downloading...")    
+                status.config(text="Downloading...")
                 try:
                     ydl.download([urlbox.get()])
                 except youtube_dl.utils.DownloadError as e:
@@ -63,43 +60,54 @@ def downloadtoMP3():
             root.focus_force()
             return
     else:
-        status.config(text="Unable to connect to internet. Connect to internet and restart this application")
+        status.config(
+            text="Unable to connect to internet. Connect to internet and restart this application"
+        )
         urlbox.config(state=DISABLED)
         return
 
     status.config(text="Downloaded Successfully (Saved to Downloads folder)")
     print("downloaded")
     urlbox.delete(0, "end")
-    urlbox.config(fg = 'grey')
-    urlbox.insert(0, 'Enter the URL')
+    urlbox.config(fg="grey")
+    urlbox.insert(0, "Enter the URL")
     root.focus_force()
 
-def on_entry_click(event):
+
+def on_entry_click():
     downloadbtn.config(state=NORMAL)
     urlbox.delete(0, "end")
-    urlbox.config(fg = 'black')
+    urlbox.config(fg="black")
     status.config(text="")
 
-title=Label(text="YouTube to MP3!",bg="white")
-title.grid(row=0,columnspan=2,sticky=NSEW)
 
-status=Label(text="",bg="white")
-status.grid(row=2,columnspan=2,sticky=NSEW)
+title = Label(text="YouTube to MP3!", bg="white")
+title.grid(row=0, columnspan=2, sticky=NSEW)
 
-urlbox=Entry(width=100)
-urlbox.grid(row=1,column=0,padx=10,ipady=3)
+status = Label(text="", bg="white")
+status.grid(row=2, columnspan=2, sticky=NSEW)
 
-urlbox.insert(0, 'Enter the URL')
-urlbox.config(fg = 'grey')
-urlbox.bind('<FocusIn>', on_entry_click)
+urlbox = Entry(width=100)
+urlbox.grid(row=1, column=0, padx=10, ipady=3)
+
+urlbox.insert(0, "Enter the URL")
+urlbox.config(fg="grey")
+urlbox.bind("<FocusIn>", lambda _: on_entry_click())
 
 
-downloadbtn=Button(text="Download",relief="groove",bg="white",command=lambda:Thread(target=downloadtoMP3).start())
-downloadbtn.grid(row=1,column=1)
+downloadbtn = Button(
+    text="Download",
+    relief="groove",
+    bg="white",
+    command=lambda: Thread(target=downloadtoMP3).start(),
+)
+downloadbtn.grid(row=1, column=1)
 downloadbtn.config(state=DISABLED)
 
 if not is_connected():
-    status.config(text="Unable to connect to internet. Connect to internet and restart this application")
+    status.config(
+        text="Unable to connect to internet. Connect to internet and restart this application"
+    )
     downloadbtn.config(state=DISABLED)
     urlbox.config(state=DISABLED)
 else:
